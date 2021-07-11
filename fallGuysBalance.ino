@@ -6,17 +6,21 @@ const int MPU_ADDR = 0x68; // I2C address of the MPU-6050. If AD0 pin is set to 
 float curX, curY, curZ; // variables for accelerometer raw data
 float roll,pitch,curRoll,curPitch=0;
 
-const int numKeys = 4;
-
-const char keyCodes[numKeys] = {'w', 'a', 's','d'};
-const float rollThresholds[numKeys] = {0, 20, -4, -23};
-const float pitchThresholds[numKeys] = {-28, -1, 14, -9};
+const int numKeys = 8;
 
 
-float tolerance = 5;        // how many degrees of tolerance to register an input (so the movement doesn't have to be as precise)
-// every character/key has these attributes
+const char keyCodes[numKeys] =          {'w', 'a', 's','d',     'w', 'a', 's','d'};
+const char keyCodesDouble[numKeys] =    {'-', '-','-', '-',     'a', 's', 'd', 'w'};
+const float rollThresholds[numKeys] =   {2.5, 20, -2, -23,        13, 9, -19, -14};
+const float pitchThresholds[numKeys] =  {-26, -3, 16, -7        -21, 13, 8, -6, -21.5};
+
+
+float tolerance = 4;        // how many degrees of tolerance to register an input (so the movement doesn't have to be as precise)
+
+// every character/key has these attributes. Some ranges represent two key presses (wa, wd, sa, sd)
 struct AccelInput {
     char keycode;
+    char keycode2;
     float roll;
     float pitch;
     boolean wasActive = false;
@@ -41,6 +45,7 @@ void setup() {
     // initialize the wasd structs
     for(int i = 0; i < numKeys; i++){
         Inputs[i].keycode = keyCodes[i];
+        Inputs[i].keycode2 = keyCodesDouble[i];
         Inputs[i].roll = rollThresholds[i];
         Inputs[i].pitch = pitchThresholds[i];
     }
@@ -65,12 +70,18 @@ void loop() {
         // if the activity state on this iteration is different from the previous iteration, press or release the key
         if(shouldActivate != Inputs[i].wasActive){
             if(shouldActivate){
-                 Keyboard.press(Inputs[i].keycode);
+                Keyboard.press(Inputs[i].keycode);
+                // if this is an input range that represents a double key press, press the other key as well
+                if(Inputs[i].keycode2 != '-'){
+                    Keyboard.press(Inputs[i].keycode2);
+                }
             }else{
-                 Keyboard.release(Inputs[i].keycode);
+                Keyboard.release(Inputs[i].keycode);
+                if(Inputs[i].keycode2 != '-'){
+                    Keyboard.release(Inputs[i].keycode2);
+                }
             }
             Inputs[i].wasActive = shouldActivate;
-            Serial.println();
         }
     }
 }
@@ -80,7 +91,7 @@ bool isWithinRange(float curVal, float targetVal){
     return ((curVal > targetVal - tolerance) && (curVal < targetVal + tolerance));
 }
 
-// reads from the accelerometer and calculate the roll and pitch of the board
+// reads from the accelerometer and calculates the roll and pitch of the board
 void getRollPitch(){
     // Read from the accelerometer to get the position of the balance board
     Wire.beginTransmission(MPU_ADDR);
@@ -106,4 +117,3 @@ void getRollPitch(){
     curRoll = 0.98 * curRoll + 0.02 * roll;
     curPitch = 0.98 * curPitch + 0.02 * pitch;
 }
-
