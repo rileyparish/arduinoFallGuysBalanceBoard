@@ -70,7 +70,6 @@ void loop() {
                  Keyboard.release(Inputs[i].keycode);
             }
             Inputs[i].wasActive = shouldActivate;
-            Serial.println();
         }
     }
 }
