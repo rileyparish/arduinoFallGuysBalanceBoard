@@ -11,11 +11,11 @@ const int numKeys = 8;
 
 const char keyCodes[numKeys] =          {'w', 'a', 's','d',     'w', 'a', 's','d'};
 const char keyCodesDouble[numKeys] =    {'-', '-','-', '-',     'a', 's', 'd', 'w'};
-const float rollThresholds[numKeys] =   {2.5, 20, -2, -23,        13, 9, -19, -14};
-const float pitchThresholds[numKeys] =  {-26, -3, 16, -7        -21, 13, 8, -6, -21.5};
+const float rollThresholds[numKeys] =   {-0.5, 20, -2, -23,        15, 14, -18.5, -17.8};
+const float pitchThresholds[numKeys] =  {-23, -3, 19, -3,        -15, 11, 10, -16};
 
 
-float tolerance = 4;        // how many degrees of tolerance to register an input (so the movement doesn't have to be as precise)
+float tolerance = 5;        // how many degrees of tolerance to register an input (so the movement doesn't have to be as precise)
 
 // every character/key has these attributes. Some ranges represent two key presses (wa, wd, sa, sd)
 struct AccelInput {
