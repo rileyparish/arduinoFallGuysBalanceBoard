@@ -13,7 +13,7 @@ const float rollThresholds[numKeys] = {0, 20, -4, -23};
 const float pitchThresholds[numKeys] = {-28, -1, 14, -9};
 
 
-float tolerance = 4.0;        // how many degrees of tolerance to register an input (so the movement doesn't have to be as precise)
+float tolerance = 5;        // how many degrees of tolerance to register an input (so the movement doesn't have to be as precise)
 // every character/key has these attributes
 struct AccelInput {
     char keycode;
@@ -102,7 +102,8 @@ void getRollPitch(){
     pitch = atan(-1 * curX / sqrt(pow(curY, 2) + pow(curZ, 2))) * 180 / PI;
   
     // Low-pass filter (to reduce noise). This is really important because the sensors are pretty noisy
-    curRoll = 0.94 * curRoll + 0.06 * roll;
-    curPitch = 0.94 * curPitch + 0.06 * pitch;
+    // .94 and .06 were the initial values. Sometimes newer values would come in that knocked the reading out of range so we got multiple key presses at the start
+    curRoll = 0.98 * curRoll + 0.02 * roll;
+    curPitch = 0.98 * curPitch + 0.02 * pitch;
 }
 
