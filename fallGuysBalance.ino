@@ -8,7 +8,7 @@ float roll,pitch,curRoll,curPitch=0;
 
 const int numKeys = 8;
 
-int divePin = 3;
+int divePin = 7;
 int jumpPin = 4;
 
 
@@ -68,7 +68,7 @@ void setup() {
     JumpDive[0].keycode = ' ';
     JumpDive[0].pin = jumpPin;
 
-    JumpDive[1].keycode = KEY_LEFT_SHIFT;
+    JumpDive[1].keycode = KEY_LEFT_CTRL;
     JumpDive[1].pin = divePin;
 }
 
