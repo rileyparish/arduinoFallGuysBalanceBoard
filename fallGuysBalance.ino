@@ -113,7 +113,7 @@ void loop() {
         if(digitalRead(JumpDive[i].pin) == LOW){
             shouldActivatePipe = true;
         }else{
-            Keyboard.release(JumpDive[i].keycode);
+            shouldActivatePipe = false;
         }
 
         if(shouldActivatePipe != JumpDive[i].wasActive){
