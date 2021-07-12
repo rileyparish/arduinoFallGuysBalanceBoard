@@ -8,6 +8,9 @@ float roll,pitch,curRoll,curPitch=0;
 
 const int numKeys = 8;
 
+int divePin = 3;
+int jumpPin = 4;
+
 
 const char keyCodes[numKeys] =          {'w', 'a', 's','d',     'w', 'a', 's','d'};
 const char keyCodesDouble[numKeys] =    {'-', '-','-', '-',     'a', 's', 'd', 'w'};
@@ -26,11 +29,20 @@ struct AccelInput {
     boolean wasActive = false;
 };
 
+// inputs for jumping/diving
+struct PipeInput {
+    char keycode;
+    int pin;
+    boolean wasActive = false;
+};
 
-boolean shouldActivate = false;     // this keeps track of whether a given key should be pressed or not given the current readings
+
+boolean shouldActivateAccel = false;     // this keeps track of whether a given key should be pressed or not given the current readings
+boolean shouldActivatePipe = false;
 
 // this is an array of AccelInput structs called "Inputs" that contains numKeys items in it (wasd)
 AccelInput Inputs[numKeys];
+PipeInput JumpDive[2];
 
 
 void setup() {
@@ -49,6 +61,15 @@ void setup() {
         Inputs[i].roll = rollThresholds[i];
         Inputs[i].pitch = pitchThresholds[i];
     }
+
+    pinMode(jumpPin, INPUT_PULLUP);
+    pinMode(divePin, INPUT_PULLUP);
+
+    JumpDive[0].keycode = ' ';
+    JumpDive[0].pin = jumpPin;
+
+    JumpDive[1].keycode = KEY_LEFT_SHIFT;
+    JumpDive[1].pin = divePin;
 }
 
 
@@ -58,18 +79,18 @@ void loop() {
 
     // now determine whether each wasd key needs to be pressed or released
     for(int i = 0; i < numKeys; i++){
-        shouldActivate = Inputs[i].wasActive;       // assume that the state will not change
+        shouldActivateAccel = Inputs[i].wasActive;       // assume that the state will not change
         // determine whether the key is within the range to register a press
         if(isWithinRange(curRoll, Inputs[i].roll) && isWithinRange(curPitch, Inputs[i].pitch)){
             // if the values are within range, the key should be pressed
-            shouldActivate = true;
+            shouldActivateAccel = true;
         }else{
-            shouldActivate = false;
+            shouldActivateAccel = false;
         }
         
         // if the activity state on this iteration is different from the previous iteration, press or release the key
-        if(shouldActivate != Inputs[i].wasActive){
-            if(shouldActivate){
+        if(shouldActivateAccel != Inputs[i].wasActive){
+            if(shouldActivateAccel){
                 Keyboard.press(Inputs[i].keycode);
                 // if this is an input range that represents a double key press, press the other key as well
                 if(Inputs[i].keycode2 != '-'){
@@ -81,7 +102,25 @@ void loop() {
                     Keyboard.release(Inputs[i].keycode2);
                 }
             }
-            Inputs[i].wasActive = shouldActivate;
+            Inputs[i].wasActive = shouldActivateAccel;
+        }
+    }
+
+    // now check if the jump/dive keys need to be pressed or released based on the status of the pins
+    for(int i = 0; i < 2; i++){
+        shouldActivatePipe = JumpDive[i].wasActive;
+
+        if(digitalRead(JumpDive[i].pin) == LOW){
+            shouldActivatePipe = true;
+        }
+
+        if(shouldActivatePipe != JumpDive[i].wasActive){
+            if(shouldActivatePipe){
+                Keyboard.press(JumpDive[i].keycode);
+            }else{
+                Keyboard.release(JumpDive[i].keycode);
+            }
+            JumpDive[i].wasActive = shouldActivatePipe;
         }
     }
 }
